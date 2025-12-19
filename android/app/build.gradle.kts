@@ -16,7 +16,6 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    // 自动匹配你之前确定的包名
     namespace "com.mystyle.purelive"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
@@ -32,7 +31,6 @@ android {
 
     defaultConfig {
         applicationId "com.mystyle.purelive"
-        // 关键：强制 23 确保 Android 6.0 可解析
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
         versionCode 1
@@ -41,7 +39,6 @@ android {
 
     buildTypes {
         release {
-            // 关键：强制 release 模式也使用调试签名，这样就不需要签名文件了
             signingConfig signingConfigs.debug
             minifyEnabled false
             shrinkResources false
@@ -53,6 +50,7 @@ flutter {
     source ../..
 }
 
+// 修正这里：移除多余的 implementation 引用，交给 Flutter 自动处理
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // 如果没有特殊插件需求，这里可以保持为空，Flutter 会自动处理其依赖
 }
