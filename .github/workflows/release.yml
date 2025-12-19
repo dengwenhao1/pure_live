@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: '输入编译分支 (填 master 或 main)'
+        description: '输入分支名 (通常填 master)'
         required: false
         default: 'master'
 
@@ -34,7 +34,7 @@ jobs:
         run: flutter pub get
 
       - name: 打包 APK
-        # 针对 6.0 TV 架构打包
+        # 强制打 release 包，但内部使用 debug 签名绕过密钥
         run: flutter build apk --release --target-platform android-arm
 
       - name: 上传产物
