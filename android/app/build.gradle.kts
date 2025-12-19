@@ -11,22 +11,11 @@ if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    // 1. 填入你的包名
     namespace "com.mystyle.purelive"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
@@ -46,21 +35,19 @@ android {
 
     defaultConfig {
         applicationId "com.mystyle.purelive"
-        // 2. 核心修改：强制支持安卓 6.0
+        // 关键：适配 Android 6.0
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        versionCode 1
+        versionName "1.0.0"
     }
 
     buildTypes {
         release {
-            // 3. 核心修改：强制使用 debug 签名，绕过对 key.jks 的需求
+            // 关键：强制使用调试签名，跳过密钥文件检测
             signingConfig signingConfigs.debug
-            
             minifyEnabled false
             shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
