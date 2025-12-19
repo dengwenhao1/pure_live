@@ -1,82 +1,89 @@
-import java.util.Properties // 添加Properties类的导入
-
-plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
-}
-
-// 加载local.properties文件
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localPropertiesFile.inputStream().use { stream ->
-            load(stream) // 现在可以正确识别load方法
-        }
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
     }
 }
 
-// 加载签名配置
-val keystoreProperties = Properties().apply { // 同样添加了导入
-    val keystorePropertiesFile = rootProject.file("key.properties")
-    if (keystorePropertiesFile.exists()) {
-        keystorePropertiesFile.inputStream().use { stream ->
-            load(stream) // 现在可以正确识别load方法
-        }
-    }
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+// 读取 GitHub Action 生成的密钥配置
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    namespace = "com.mystyle.purelive"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
-    lint {
-        disable.add("NullSafeMutableLiveData")
-    }
+    namespace "com.mystyle.purelive"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = '1.8'
     }
 
     defaultConfig {
-        applicationId = "com.mystyle.purelive"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        // 使用你确认的包名
+        applicationId "com.mystyle.purelive"
+        // 关键：直接锁定为 23，不使用变量，确保 6.0 兼容
+        minSdkVersion 23
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
     }
 
     signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties["keyAlias"].toString()
-            keyPassword = keystoreProperties["keyPassword"].toString()
-            storeFile = file(keystoreProperties["storeFile"].toString())
-            storePassword = keystoreProperties["storePassword"].toString()
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+
+            // 核心：强制开启 V1 签名解决解析程序错误
+            v1SigningEnabled true
+            v2SigningEnabled true
         }
     }
 
     buildTypes {
-       release {
-            signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                  getDefaultProguardFile("proguard-android-optimize.txt"),
-                  file("proguard-rules.pro")
-              )
-        }
-       debug {
-            signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
-            isShrinkResources = false
+        release {
+            signingConfig signingConfigs.release
+            // 关闭混淆以获得最佳兼容性
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 flutter {
-    source = "../.."
-}    
+    source ../..
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
