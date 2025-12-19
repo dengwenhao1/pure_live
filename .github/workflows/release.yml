@@ -1,10 +1,10 @@
-name: app-build-android-only
+name: app-build-android
 
 on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: '输入编译的分支名 (例如 master)'
+        description: '输入编译分支 (填 master 或 main)'
         required: false
         default: 'master'
 
@@ -33,14 +33,12 @@ jobs:
       - name: 更新依赖
         run: flutter pub get
 
-      - name: 打包 Android 调试版 (适配 6.0 TV)
-        # --debug 会使用系统默认签名，跳过密钥要求
-        # --target-platform android-arm 专门针对老旧电视的 v7a 架构
-        run: flutter build apk --debug --target-platform android-arm
+      - name: 打包 APK
+        # 针对 6.0 TV 架构打包
+        run: flutter build apk --release --target-platform android-arm
 
-      - name: 上传 APK 产物
+      - name: 上传产物
         uses: actions/upload-artifact@v4
         with:
           name: android-tv-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
-          retention-days: 1
+          path: build/app/outputs/flutter-apk/app-release.apk
