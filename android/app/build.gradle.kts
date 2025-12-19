@@ -8,7 +8,7 @@ if (localPropertiesFile.exists()) {
 
 def flutterRoot = localProperties.getProperty('flutter.sdk')
 if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+    throw new GradleException("Flutter SDK not found.")
 }
 
 apply plugin: 'com.android.application'
@@ -29,13 +29,9 @@ android {
         jvmTarget = '1.8'
     }
 
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
-
     defaultConfig {
         applicationId "com.mystyle.purelive"
-        // 关键：适配 Android 6.0
+        // 关键：适配安卓 6.0
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
         versionCode 1
@@ -44,7 +40,7 @@ android {
 
     buildTypes {
         release {
-            // 关键：强制使用调试签名，跳过密钥文件检测
+            // 关键：即使是 release 也用 debug 签名，这样你不需要 key.jks 也能打包成功
             signingConfig signingConfigs.debug
             minifyEnabled false
             shrinkResources false
@@ -57,5 +53,5 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    // 保持为空，由 Flutter 插件自动处理依赖
 }
