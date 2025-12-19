@@ -31,7 +31,7 @@ android {
 
     defaultConfig {
         applicationId "com.mystyle.purelive"
-        // 关键：确保安卓 6.0 电视能解析
+        // 核心：适配安卓 6.0 电视
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
         versionCode 1
@@ -40,7 +40,7 @@ android {
 
     buildTypes {
         release {
-            // 关键：强制用 debug 签名，绕过你没有 key.jks 的问题
+            // 核心：即使是 release 编译也强制借用 debug 签名，跳过 key.jks
             signingConfig signingConfigs.debug
             minifyEnabled false
             shrinkResources false
@@ -52,4 +52,6 @@ flutter {
     source ../..
 }
 
-dependencies {}
+dependencies {
+    // 留空，Flutter 会处理
+}
