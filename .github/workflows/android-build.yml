@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: '编译分支'
+        description: '输入 master'
         required: false
         default: 'master'
 
@@ -15,7 +15,6 @@ jobs:
       - name: 签出代码
         uses: actions/checkout@v4
         with:
-          # 这样写可以确保即使输入框为空，也能抓到 master 分支
           ref: ${{ github.event.inputs.tag_name || 'master' }}
 
       - name: 设置 JAVA 环境
@@ -34,11 +33,11 @@ jobs:
       - name: 更新依赖
         run: flutter pub get
 
-      - name: 打包 Android APK (适配 6.0 TV)
-        # 针对电视 v7a 架构，使用 debug 签名绕过所有密钥报错
+      - name: 打包 APK
+        # 强制使用 debug 模式打包，确保签名没问题
         run: flutter build apk --debug --target-platform android-arm
 
-      - name: 上传 APK
+      - name: 上传产物
         uses: actions/upload-artifact@v4
         with:
           name: android-tv-apk
